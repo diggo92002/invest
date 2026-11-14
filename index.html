@@ -9,40 +9,147 @@
     :root{--ink:#17231d;--muted:#6c786f;--paper:#f7f6f1;--card:#fff;--line:#e5e7df;--green:#1b6b4b;--mint:#dff2e5;--lime:#cbe76b;--orange:#e98a58;--shadow:0 18px 50px rgba(20,48,32,.08)}
     *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,"Noto Sans TC",system-ui,-apple-system,sans-serif} button,input{font:inherit} button{cursor:pointer}
     .shell{max-width:1180px;margin:auto;padding:28px 24px 56px}.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:42px}.brand{display:flex;gap:12px;align-items:center;font-weight:800;letter-spacing:-.03em}.mark{width:34px;height:34px;border-radius:11px;background:var(--ink);color:var(--lime);display:grid;place-items:center;font-size:17px}.nav small{color:var(--muted);font-size:12px}
-    .hero{display:grid;grid-template-columns:1.3fr .7fr;gap:48px;align-items:end;margin-bottom:36px}.eyebrow{color:var(--green);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.hero h1{font-size:clamp(38px,6vw,74px);line-height:.98;letter-spacing:-.07em;margin:14px 0 20px;max-width:720px}.hero p{color:var(--muted);font-size:17px;line-height:1.7;max-width:650px}.hero-note{border-left:3px solid var(--lime);padding:18px 0 18px 20px;color:var(--muted);line-height:1.7;font-size:14px}.hero-note strong{display:block;color:var(--ink);font-size:22px;letter-spacing:-.04em;margin-bottom:6px}
+    .hero{display:grid;grid-template-columns:1.3fr .7fr;gap:48px;align-items:end;margin-bottom:36px}.eyebrow{color:var(--green);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.hero h1{font-size:clamp(28px,4.5vw,56px);line-height:1.15;letter-spacing:-.07em;margin:14px 0 20px;max-width:720px}.hero p{color:var(--muted);font-size:15px;line-height:1.7;max-width:650px}.hero-note{border-left:3px solid var(--lime);padding:18px 0 18px 20px;color:var(--muted);line-height:1.7;font-size:13px}.hero-note strong{display:block;color:var(--ink);font-size:19px;letter-spacing:-.04em;margin-bottom:6px}
     .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}.metric{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:19px 20px;box-shadow:var(--shadow)}.metric .label{font-size:12px;color:var(--muted);margin-bottom:12px}.metric .value{font-size:25px;font-weight:800;letter-spacing:-.04em}.metric.good{background:var(--ink);color:white}.metric.good .label{color:#a9c3b3}.metric.good .value{color:var(--lime)}.delta{font-size:12px;margin-top:9px;color:var(--muted)}.good .delta{color:#c8e9d2}
     .grid{display:grid;grid-template-columns:1fr 1.25fr;gap:18px;align-items:start}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}.card h2{font-size:20px;letter-spacing:-.04em;margin:0 0 5px}.sub{color:var(--muted);font-size:13px;margin:0 0 22px;line-height:1.6}.section-head{display:flex;justify-content:space-between;align-items:start;margin-bottom:18px}.pill{font-size:11px;font-weight:800;padding:7px 10px;border-radius:99px;background:var(--mint);color:var(--green)}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:7px}.field input{width:100%;border:1px solid var(--line);border-radius:11px;background:#fbfcf9;padding:11px 12px;color:var(--ink);outline:none}.field input:focus{border-color:var(--green);box-shadow:0 0 0 3px #dff2e5}.wide{grid-column:1/-1}.cta{width:100%;border:0;border-radius:12px;background:var(--green);color:#fff;font-weight:800;padding:13px;margin-top:18px}.cta:hover{background:#14563c}
-    .stocks{display:grid;gap:10px}.stock{display:grid;grid-template-columns:46px 1fr auto;gap:13px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:15px}.stock-num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--green);font-weight:800}.stock h3{font-size:15px;margin:0 0 4px}.stock p{font-size:12px;color:var(--muted);margin:0}.yield{font-weight:800;color:var(--green);font-size:15px}.yield small{font-weight:500;color:var(--muted);display:block;text-align:right;font-size:10px;margin-top:3px}.stock input{width:90px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;text-align:right;margin-top:6px}
+    .allocation-preset{border:1px solid var(--green);border-radius:10px;background:var(--mint);color:var(--green);font-size:13px;font-weight:700;padding:10px 14px;margin-bottom:16px}.allocation-preset:hover{background:#cce8d6}.allocation-preset:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+    .market-tools{margin-bottom:16px;color:var(--muted);font-size:12px;line-height:1.7}.market-tools p{margin:4px 0}.market-tools a{color:var(--green)}.market-tools button{margin-bottom:4px}.market-tools button:disabled{opacity:.6;cursor:wait}.yield small{max-width:115px;line-height:1.5}
+    .stocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}.stock{display:flex;flex-direction:column;gap:10px;align-items:stretch;padding:12px;border:1px solid var(--line);border-radius:15px}.stock>div{min-width:0}.stock h3{line-height:1.5;overflow-wrap:break-word}.allocation-field{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:12px;margin-top:8px}.allocation-field input{margin-top:0;max-width:60%}.stock h3{font-size:14px;margin:0 0 4px}.stock p{font-size:11px;color:var(--muted);margin:0;line-height:1.45}.yield{font-weight:800;color:var(--green);font-size:14px;text-align:right}.yield small{font-weight:500;color:var(--muted);display:block;text-align:right;font-size:10px;margin-top:3px}.stock input{width:72px;padding:6px 7px;border:1px solid var(--line);border-radius:8px;text-align:right;margin-top:6px;font-size:12px}.allocation-total{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;background:#fbfcf9;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--muted)}.allocation-total strong{color:var(--green)}
     .cashflow{margin-top:18px}.bars{display:grid;grid-template-columns:repeat(12,1fr);gap:7px;align-items:end;height:150px;border-bottom:1px solid var(--line);padding:10px 0 0}.bar-col{height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:6px}.bar{width:100%;max-width:34px;border-radius:7px 7px 2px 2px;background:var(--lime);min-height:8px;position:relative}.bar:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--orange);border-radius:2px}.bar-label{font-size:10px;color:var(--muted)}.legend{display:flex;gap:15px;font-size:11px;color:var(--muted);margin-top:13px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);margin-right:5px}.dot.orange{background:var(--orange)}
     .calendar{margin-top:18px}.month-row{display:grid;grid-template-columns:repeat(12,1fr);gap:7px}.month{min-height:86px;background:#fbfcf9;border:1px solid var(--line);border-radius:13px;padding:10px 8px;display:flex;flex-direction:column;justify-content:space-between}.month strong{font-size:12px}.month span{font-size:11px;color:var(--green);font-weight:800}.month em{font-size:10px;color:var(--muted);font-style:normal}.month.alert{background:#fff3ec;border-color:#f6d5c3}.month.alert span{color:#b4582f}.foot{margin-top:22px;padding-top:17px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.7}
     @media(max-width:850px){.hero,.grid{grid-template-columns:1fr;gap:20px}.hero{margin-bottom:25px}.summary{grid-template-columns:1fr 1fr}.month-row{grid-template-columns:repeat(6,1fr)}.month{min-height:76px}.bars{height:130px}}
-    @media(max-width:520px){.shell{padding:20px 15px 40px}.nav{margin-bottom:30px}.nav small{display:none}.hero h1{font-size:48px}.summary{gap:8px}.metric{padding:15px}.metric .value{font-size:20px}.form-grid{grid-template-columns:1fr}.wide{grid-column:auto}.month-row{grid-template-columns:repeat(4,1fr)}}
+    @media(max-width:520px){.shell{padding:20px 15px 40px}.nav{margin-bottom:30px}.nav small{display:none}.hero h1{font-size:30px}.summary{gap:8px}.metric{padding:15px}.metric .value{font-size:20px}.form-grid{grid-template-columns:1fr}.wide{grid-column:auto}.month-row{grid-template-columns:repeat(4,1fr)}}
+  .stock .yield{min-width:0;text-align:left;margin-top:auto}.stock .yield label{display:flex;align-items:center;gap:5px;white-space:nowrap}.stock .yield small{max-width:none;text-align:left}.stock .yield-auto{margin-left:0}.stock .yield-input{width:66px;color:var(--green);font-weight:800;margin:0}.yield-auto{display:block;margin:5px 0 0 auto;padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:white;color:var(--green);font-size:10px;cursor:pointer}.yield-auto[hidden]{display:none}@media(max-width:520px){.stock{grid-template-columns:minmax(0,1fr);gap:7px}.stock .yield{grid-column:1;text-align:left}.yield small{text-align:left}.yield-auto{margin-left:0}}
+  .stock{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;column-gap:12px;row-gap:8px}.stock>div:first-child{display:contents}.stock h3,.stock p{grid-column:1/-1;margin:0}.stock .allocation-field{grid-column:1;grid-row:3;align-self:start;margin:0;min-width:0}.stock .allocation-field input{width:72px;max-width:55%}.stock .yield{grid-column:2;grid-row:3;margin:0;text-align:right}.stock .yield small{max-width:110px;text-align:right}.stock .yield-auto{margin-left:auto}.stock .yield-input{width:66px}.stock .yield label{justify-content:flex-end}
   </style>
 </head>
 <body>
   <main class="shell">
     <nav class="nav"><div class="brand"><span class="mark">↗</span>現金流配息計畫</div><small>試算工具 · 2026 / 11 / 11</small></nav>
     <section class="hero"><div><div class="eyebrow">Cashflow planning / 01</div><h1>讓配息，排得上你的還款日。</h1><p>把貸款月付金與季度配息放進同一張圖，先看現金流能不能接住，再思考投資配置。</p></div><div class="hero-note"><strong>先守住現金流</strong>本金、利息、稅費與股價波動都會影響結果。這裡是估算器，不是投資保證。</div></section>
-    <section class="summary"><div class="metric good"><div class="label">預估每月配息</div><div class="value" id="monthlyIncome">NT$ 18,250</div><div class="delta">按季度入帳平均攤算</div></div><div class="metric"><div class="label">貸款月付金</div><div class="value" id="monthlyPay">NT$ 15,849</div><div class="delta">本息平均攤還</div></div><div class="metric"><div class="label">每月現金流餘額</div><div class="value" id="monthlyGap">+NT$ 2,401</div><div class="delta" id="gapNote">安全墊約 15.2%</div></div><div class="metric"><div class="label">預估年配息率</div><div class="value" id="avgYield">7.30%</div><div class="delta">三檔配置加權</div></div></section>
-    <section class="grid"><div><article class="card"><div class="section-head"><div><h2>貸款試算</h2><p class="sub">調整數字，立刻重算每月還款。</p></div><span class="pill">本息攤還</span></div><div class="form-grid"><div class="field wide"><label>貸款本金 <span>新台幣</span></label><input id="principal" type="number" value="2000000" min="0" step="10000"></div><div class="field"><label>年利率 <span>%</span></label><input id="rate" type="number" value="2.2" min="0" step="0.1"></div><div class="field"><label>期數 <span>年</span></label><input id="years" type="number" value="15" min="1" step="1"></div></div><button class="cta" id="recalc">重新計算現金流 ↗</button></article><article class="card" style="margin-top:18px"><div class="section-head"><div><h2>三檔配息配置</h2><p class="sub">示意標的與殖利率，可替換成你研究中的股票或 ETF。</p></div><span class="pill">季度配息</span></div><div class="stocks"><div class="stock"><span class="stock-num">01</span><div><h3>台灣高股息 ETF</h3><p>1、4、7、10 月 · 防守核心</p><input class="alloc" type="number" value="40" min="0" max="100"> % 配置</div><div class="yield">6.8%<small>示意殖利率</small></div></div><div class="stock"><span class="stock-num">02</span><div><h3>金融股高股息</h3><p>2、5、8、11 月 · 現金流</p><input class="alloc" type="number" value="35" min="0" max="100"> % 配置</div><div class="yield">7.5%<small>示意殖利率</small></div></div><div class="stock"><span class="stock-num">03</span><div><h3>成熟產業收益股</h3><p>3、6、9、12 月 · 分散配置</p><input class="alloc" type="number" value="25" min="0" max="100"> % 配置</div><div class="yield">7.9%<small>示意殖利率</small></div></div></div><div class="foot">提示：殖利率不是固定利息，配息可能調整，除息後股價也可能波動。請先確認標的、除息日、入帳日與稅務。</div></article></div><div><article class="card"><div class="section-head"><div><h2>每月現金流</h2><p class="sub">黃色為配息流入，橘線為貸款支出。每月都能看到一個節奏。</p></div><span class="pill">12 個月視圖</span></div><div class="bars" id="bars"></div><div class="legend"><span><i class="dot"></i>預估配息</span><span><i class="dot orange"></i>月付金</span></div><div class="calendar"><div class="month-row" id="calendar"></div></div></article><article class="card" style="margin-top:18px"><h2>一眼判斷</h2><p class="sub">當「每月配息平均」高於「貸款月付金」，才有機會形成正向現金流；但實際入帳會集中在季度月份，請預留緩衝。</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:var(--mint);padding:14px;border-radius:14px"><div style="font-size:11px;color:var(--green)">年度配息總額</div><strong id="annualIncome" style="display:block;font-size:22px;margin-top:5px">NT$ 219,000</strong></div><div style="background:#fff3ec;padding:14px;border-radius:14px"><div style="font-size:11px;color:#b4582f">年度還款總額</div><strong id="annualPay" style="display:block;font-size:22px;margin-top:5px">NT$ 190,188</strong></div></div></article></div></section>
+    <section class="summary"><div class="metric good"><div class="label">預估每月配息</div><div class="value" id="monthlyIncome">NT$ 18,250</div><div class="delta">按季度入帳平均攤算</div></div><div class="metric"><div class="label">貸款月付金</div><div class="value" id="monthlyPay">NT$ 15,849</div><div class="delta">本息平均攤還</div></div><div class="metric"><div class="label">每月現金流餘額</div><div class="value" id="monthlyGap">+NT$ 2,401</div><div class="delta" id="gapNote">安全墊約 15.2%</div></div><div class="metric"><div class="label">預估年配息率</div><div class="value" id="avgYield">7.30%</div><div class="delta">目前配置加權</div></div></section>
+    <section class="grid"><div><article class="card"><div class="section-head"><div><h2>貸款試算</h2><p class="sub">調整數字，立刻重算每月還款。</p></div><span class="pill">本息攤還</span></div><div class="form-grid"><div class="field wide"><label>貸款本金 <span>新台幣</span></label><input id="principal" type="number" value="2000000" min="0" step="10000"></div><div class="field"><label>年利率 <span>%</span></label><input id="rate" type="number" value="2.2" min="0" step="0.1"></div><div class="field"><label>期數 <span>年</span></label><input id="years" type="number" value="15" min="1" step="1"></div></div><button class="cta" id="recalc">重新計算現金流 ↗</button></article><article class="card" style="margin-top:18px"><div class="section-head"><div><h2>7 檔月配／季配 ETF</h2><p class="sub">僅列月配、季配息 ETF，可自行調整比例。殖利率為參考值，不是保證報酬。</p></div><span class="pill">可自行調整</span></div><button type="button" class="allocation-preset" id="presetThree" title="0056：34%、00878：33%、00919：33%，其餘歸零">預設 3 檔配置</button> <button type="button" class="allocation-preset" id="recommendAllocation" aria-describedby="allocationHint" title="七檔平均分散：0056、00878 各 15%，其餘各 14%">推薦分配比例</button><p class="sub" id="allocationHint" role="status" aria-live="polite">推薦比例採七檔平均分散的試算範例，可套用後再自行調整。</p><div class="market-tools"><button type="button" class="allocation-preset" id="refreshYields">更新殖利率</button><p id="marketStatus" role="status" aria-live="polite">尚未更新，使用內建試算值；可直接修改各檔殖利率，手動設定不會被自動更新覆蓋。</p><p>資料來源：<a href="https://openapi.twse.com.tw/" target="_blank" rel="noopener noreferrer">證交所</a>、<a href="https://www.twse.com.tw/zh/products/securities/etf/products/div.html" target="_blank" rel="noopener noreferrer">ETF 收益分配</a>。每日收盤資料；ETF 採近一年除息金額 ÷ 收盤價。入帳月份仍為模擬設定。</p></div><div class="stocks" id="stocks"></div><div class="foot">內建數值僅供試算；成功連線後改用證交所資料，每檔會顯示資料日期。實際殖利率會隨股價、配息政策與除權息變動。本名單僅保留月配、季配息 ETF，請自行確認規模、填息率與配息來源。</div></article></div><div><article class="card"><div class="section-head"><div><h2>每月現金流</h2><p class="sub">黃色為配息流入，橘線為貸款支出。每月都能看到一個節奏。</p></div><span class="pill">12 個月視圖</span></div><div class="bars" id="bars"></div><div class="legend"><span><i class="dot"></i>預估配息</span><span><i class="dot orange"></i>月付金</span></div><div class="calendar"><div class="month-row" id="calendar"></div></div></article><article class="card" style="margin-top:18px"><h2>一眼判斷</h2><p class="sub">當「每月配息平均」高於「貸款月付金」，才有機會形成正向現金流；但實際入帳仍依各檔月配、季配時程而定，請預留緩衝。</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:var(--mint);padding:14px;border-radius:14px"><div style="font-size:11px;color:var(--green)">年度配息總額</div><strong id="annualIncome" style="display:block;font-size:22px;margin-top:5px">NT$ 219,000</strong></div><div style="background:#fff3ec;padding:14px;border-radius:14px"><div style="font-size:11px;color:#b4582f">年度還款總額</div><strong id="annualPay" style="display:block;font-size:22px;margin-top:5px">NT$ 190,188</strong></div></div></article></div></section>
     <footer class="foot">本頁僅供個人財務規劃與教育用途，不構成投資、借貸或稅務建議。高殖利率可能伴隨高波動與減配風險；借款投資前請評估收入穩定度、緊急預備金與最壞情境。</footer>
   </main>
+  <script src="market-data.js"></script>
   <script>
     const $=s=>document.querySelector(s), money=n=>'NT$ '+Math.round(n).toLocaleString('zh-TW');
     const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-    const stockYields=[.068,.075,.079], payMonths=[[1,4,7,10],[2,5,8,11],[3,6,9,12]];
+    const stocks=[
+      ['0056','元大高股息 ETF','1、4、7、10 月 · ETF 核心',.082,[1,4,7,10],34],
+      ['00878','國泰永續高股息 ETF','2、5、8、11 月 · ESG',.074,[2,5,8,11],33],
+      ['00919','群益台灣精選高息 ETF','3、6、9、12 月 · 高息',.101,[3,6,9,12],33],
+      ['00713','元大台灣高息低波 ETF','1、4、7、10 月 · 低波動',.068,[1,4,7,10],0],
+      ['00918','大華優利高填息 30 ETF','3、6、9、12 月 · 填息',.105,[3,6,9,12],0],
+      ['00929','復華台灣科技優息 ETF','每月配息 · 科技',.081,[1,2,3,4,5,6,7,8,9,10,11,12],0],
+      ['00915','凱基優選高股息 30 ETF','1、4、7、10 月 · 分散',.087,[1,4,7,10],0],
+    ];
+    const stockYields=stocks.map(x=>x[3]), payMonths=stocks.map(x=>x[4]);
+    $('#stocks').innerHTML=stocks.map((s,i)=>'<div class="stock"><div><h3>'+s[0]+' '+s[1]+'</h3><p>'+s[2]+'</p><label class="allocation-field"><input class="alloc" data-index="'+i+'" type="number" value="'+s[5]+'" min="0" max="100" step="1"> <span>% 配置</span></label></div><div class="yield">'+(s[3]*100).toFixed(1)+'%<small>內建試算值・未更新</small></div></div>').join('')+'<div class="allocation-total"><span>配置合計</span><strong id="allocationTotal">100%</strong></div>';
     function calc(){
       const principal=+$('#principal').value||0, rate=(+$('#rate').value||0)/100/12, n=(+$('#years').value||1)*12;
       const pay=rate?principal*rate*Math.pow(1+rate,n)/(Math.pow(1+rate,n)-1):principal/n;
-      const alloc=[...document.querySelectorAll('.alloc')].map(x=>(+x.value||0)/100); const weighted=alloc.reduce((a,x,i)=>a+x*stockYields[i],0);
+      const alloc=[...document.querySelectorAll('.alloc')].map(x=>(+x.value||0)/100); const weighted=alloc.reduce((a,x,i)=>a+x*stockYields[i],0); $('#allocationTotal').textContent=(alloc.reduce((a,x)=>a+x,0)*100).toFixed(0)+'%';
       const annual=principal*weighted, avg=annual/12, gap=avg-pay;
       $('#monthlyIncome').textContent=money(avg); $('#monthlyPay').textContent=money(pay); $('#monthlyGap').textContent=(gap>=0?'+':'−')+money(Math.abs(gap)).replace('NT$ ','NT$ '); $('#avgYield').textContent=(weighted*100).toFixed(2)+'%'; $('#annualIncome').textContent=money(annual); $('#annualPay').textContent=money(pay*12); $('#gapNote').textContent=(gap>=0?'安全墊約 ':'缺口約 ')+Math.abs(gap/pay*100).toFixed(1)+'%';
-      const q=Array(12).fill(0); alloc.forEach((a,i)=>payMonths[i].forEach(m=>q[m-1]+=principal*stockYields[i]*a/4));
+      const q=Array(12).fill(0); alloc.forEach((a,i)=>payMonths[i].forEach(m=>q[m-1]+=principal*stockYields[i]*a/payMonths[i].length));
       $('#bars').innerHTML=q.map((v,i)=>'<div class="bar-col"><div class="bar" style="height:'+Math.max(8,Math.min(100,v/(Math.max(...q)||1)*100))+'%" title="'+money(v)+'"></div><div class="bar-label">'+months[i].replace('月','')+'</div></div>').join('');
       $('#calendar').innerHTML=q.map((v,i)=>'<div class="month '+(v<pay?'alert':'')+'"><strong>'+months[i]+'</strong><span>'+money(v)+'</span><em>'+ (v>=pay?'可覆蓋月付':'需預留') +'</em></div>').join('');
     }
+    const threeStockAllocation={'0056':34,'00878':33,'00919':33};
+    const recommendedAllocation={'0056':15,'00878':15,'00919':14,'00713':14,'00918':14,'00929':14,'00915':14};
+    function applyAllocation(allocation, message) {
+      document.querySelectorAll('.alloc').forEach(input=>{input.value=allocation[stocks[Number(input.dataset.index)][0]]??0;});
+      $('#allocationHint').textContent=message;
+      calc();
+    }
+    const manualYieldKey = 'cashflow-manual-yields-v1';
+    let manualYields = {};
+    try {
+      const saved = JSON.parse(localStorage.getItem(manualYieldKey) || '{}');
+      stocks.forEach(stock => {
+        const value = saved?.[stock[0]];
+        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100) manualYields[stock[0]] = value;
+      });
+    } catch {}
+    function saveManualYields() {
+      try { localStorage.setItem(manualYieldKey, JSON.stringify(manualYields)); } catch {}
+    }
+    document.querySelectorAll('.stock .yield').forEach((element, index) => {
+      element.innerHTML = '<label><input class="yield-input" type="number" min="0" max="100" step="0.01" aria-label="'+stocks[index][0]+' 殖利率百分比"> %</label><small class="yield-source"></small><button type="button" class="yield-auto">恢復自動</button>';
+      element.querySelector('input').addEventListener('input', event => {
+        const input = event.target;
+        if (input.value === '' || !input.validity.valid) return;
+        manualYields[stocks[index][0]] = Number(input.value);
+        saveManualYields();
+        applyMarketRecords();
+      });
+      element.querySelector('button').addEventListener('click', () => {
+        delete manualYields[stocks[index][0]];
+        saveManualYields();
+        applyMarketRecords();
+      });
+    });
+    let marketRecords = CashflowMarket.cached();
+    let updatingYields = false;
+    function applyMarketRecords(freshCodes = []) {
+      stocks.forEach((stock, index) => {
+        const record = marketRecords[stock[0]];
+        const manual = Object.hasOwn(manualYields, stock[0]);
+        stockYields[index] = manual ? manualYields[stock[0]] / 100 : (record ? record.yield : stock[3]);
+        const element = document.querySelectorAll('.stock .yield')[index];
+        const input = element.querySelector('input');
+        if (document.activeElement !== input) input.value = (stockYields[index] * 100).toFixed(2);
+        const label = element.querySelector('.yield-source');
+        element.querySelector('button').hidden = !manual;
+        if (manual) {
+          label.textContent = '手動設定';
+          label.title = record ? '自動資料：' + (record.yield * 100).toFixed(2) + '%・' + record.date : '自動資料尚未取得';
+          return;
+        }
+        if (!record) {
+          label.textContent = '內建試算值・未更新';
+          label.title = '';
+          return;
+        }
+        label.textContent = (freshCodes.includes(stock[0]) ? '資料日 ' : '上次資料 ') + record.date;
+        label.title = record.method;
+      });
+      calc();
+    }
+    async function refreshYields() {
+      if (updatingYields) return;
+      updatingYields = true;
+      $('#refreshYields').disabled = true;
+      $('#marketStatus').textContent = '正在向證交所取得資料…';
+      try {
+        const fresh = await CashflowMarket.update(stocks.map(stock => stock[0]));
+        const codes = Object.keys(fresh);
+        // Never replace a newer cached trading day with older upstream data.
+        codes.forEach(code => {
+          if (!marketRecords[code] || fresh[code].date >= marketRecords[code].date) marketRecords[code] = fresh[code];
+        });
+        CashflowMarket.save(marketRecords);
+        applyMarketRecords(codes);
+        const checkedAt = new Date().toLocaleString('zh-TW', {timeZone: 'Asia/Taipei', hour12: false});
+        $('#marketStatus').textContent = codes.length
+          ? '已取得 ' + codes.length + '/' + stocks.length + ' 檔資料；查詢時間 ' + checkedAt + '（台北）。' + (codes.length < stocks.length ? '其餘保留上次資料或內建試算值，詳見各檔標示。' : '資料日期詳見各檔標示。')
+          : '更新失敗，保留上次資料或內建試算值。請確認網路；證交所跨網域限制或公司代理伺服器可能阻擋連線。';
+      } catch {
+        $('#marketStatus').textContent = '更新失敗，保留上次資料或內建試算值，請稍後重試。';
+      } finally {
+        updatingYields = false;
+        $('#refreshYields').disabled = false;
+      }
+    }
+    $('#refreshYields').addEventListener('click', refreshYields);
+    $('#presetThree').addEventListener('click',()=>applyAllocation(threeStockAllocation,'已套用 3 檔配置：0056 34%、00878 33%、00919 33%，其餘歸零。'));
+    $('#recommendAllocation').addEventListener('click',()=>applyAllocation(recommendedAllocation,'已套用七檔平均分散範例：0056、00878 各 15%，其餘各 14%，合計 100%。'));
     document.querySelectorAll('input').forEach(x=>x.addEventListener('input',calc)); $('#recalc').addEventListener('click',calc); calc();
+    applyMarketRecords();
+    refreshYields();
+    setInterval(() => { if (!document.hidden) refreshYields(); }, 60 * 60 * 1000);
   </script>
 </body>
 </html>
