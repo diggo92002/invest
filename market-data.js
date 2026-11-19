@@ -11,6 +11,7 @@ window.CashflowMarket = (() => {
   const graceDays = 31; // Ex-dividend dates drift by days or weeks between years.
   const taipeiDate = new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'});
   const isETF = code => code.startsWith('00');
+  const cleanName = value => String(value ?? '').trim().slice(0, 40) || undefined;
   function number(value) {
     const text = String(value ?? '').replace(/,/g, '').trim();
     return /^\d+(\.\d+)?$/.test(text) ? Number(text) : NaN;
@@ -89,7 +90,7 @@ window.CashflowMarket = (() => {
       // Missing distributions or amounts must not silently become a zero yield.
       if (used.some(row => !Number.isFinite(row.amount))) { warn(code + ' 配息金額缺漏'); continue; }
       const annual = used.reduce((sum, row) => sum + row.amount, 0);
-      const record = {yield: annual / close, date: priceDate,
+      const record = {yield: annual / close, date: priceDate, name: cleanName(price.Name),
         method: known ? '最近 ' + expected + ' 次除息金額／收盤價' : '近一年除息金額／收盤價（配息頻率未知）'};
       if (valid(record)) records[code] = record;
       else warn(code + ' 計算結果超出合理範圍，未採用');
@@ -107,17 +108,23 @@ window.CashflowMarket = (() => {
     const warn = message => { if (!warnings.includes(message)) warnings.push(message); };
     const wantStocks = codes.some(code => !isETF(code));
     const wantETFs = codes.some(isETF);
+    const notListed = (found, etf) => codes.filter(code => isETF(code) === etf && !found.has(code))
+      .forEach(code => warn(code + ' 查無上市資料（可能為上櫃或代號錯誤）'));
     const [yields, prices] = await Promise.allSettled([json('yields'), json('prices')]);
     if (yields.status === 'fulfilled' && Array.isArray(yields.value)) {
+      const found = new Set();
       for (const row of yields.value) {
         if (!wanted.has(row.Code) || isETF(row.Code)) continue;
-        const record = {yield: number(row.DividendYield) / 100, date: date(row.Date), method: '證交所殖利率'};
+        found.add(row.Code);
+        const record = {yield: number(row.DividendYield) / 100, date: date(row.Date), name: cleanName(row.Name), method: '證交所殖利率'};
         if (valid(record)) records[row.Code] = record;
         else warn(row.Code + ' 無有效殖利率資料');
       }
+      notListed(found, false);
     } else if (wantStocks) warn('個股殖利率資料取得失敗');
     if (prices.status === 'fulfilled' && Array.isArray(prices.value)) {
       const etfPrices = prices.value.filter(row => wanted.has(row.Code) && isETF(row.Code));
+      notListed(new Set(etfPrices.map(row => row.Code)), true);
       const dates = etfPrices.map(row => date(row.Date)).filter(Boolean).sort();
       if (dates.length) {
         // Start from the earliest price date so every ETF's window is fully covered.

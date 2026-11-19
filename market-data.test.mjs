@@ -122,3 +122,14 @@ test('local service uses fixed same-origin proxy routes', async () => {
   await setup(url => {urls.push(url); return [];}, '{}', true).update(['1101']);
   assert.deepEqual(urls.sort(), ['/api/market/prices', '/api/market/yields']);
 });
+test('records carry official names and unknown codes are reported', async () => {
+  const {records, warnings} = await setup(url => {
+    if (url.includes('BWIBBU_ALL')) return [{Code: '2884', Name: '玉山金', DividendYield: '4.10', Date: '1151111'}];
+    if (url.includes('STOCK_DAY_ALL')) return [{Code: '0056', Name: '元大高股息', ClosingPrice: '40.00', Date: '1151111'}];
+    return fixtures(url);
+  }).update(['2884', '9999', '0056', '00999'], {'0056': 4});
+  assert.equal(records['2884'].name, '玉山金');
+  assert.equal(records['0056'].name, '元大高股息');
+  assert.ok(warnings.includes('9999 查無上市資料（可能為上櫃或代號錯誤）'));
+  assert.ok(warnings.includes('00999 查無上市資料（可能為上櫃或代號錯誤）'));
+});
