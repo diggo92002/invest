@@ -32,6 +32,22 @@ const fixtures = url => {
 };
 const withDividends = rows => url => url.includes('etfDiv') ? {stat: 'OK', fields, data: rows} : fixtures(url);
 
+test('automatic stock lookup uses payment months rather than ex-dividend months', async () => {
+  const market=setup(url=>url.includes('finmindtrade')?{status:200,data:[
+    {stock_id:'1101',CashEarningsDistribution:1,CashStatutorySurplus:0,CashDividendPaymentDate:'2026-08-15',CashExDividendTradingDate:'2026-07-15'},
+    {stock_id:'1101',CashEarningsDistribution:1,CashStatutorySurplus:0,CashDividendPaymentDate:'2025-08-15'},
+    {stock_id:'1101',CashEarningsDistribution:1,CashStatutorySurplus:0,CashDividendPaymentDate:'2027-01-15'}
+  ]}:fixtures(url));
+  const record=await market.lookup('1101');
+  assert.deepEqual(Array.from(record.months),[8]);
+  assert.ok(Math.abs(record.yield-.0289)<1e-12);
+});
+
+test('automatic lookup rejects missing payment dates instead of inventing months', async () => {
+  const market=setup(url=>url.includes('finmindtrade')?{status:200,data:[]}:fixtures(url));
+  await assert.rejects(market.lookup('1101'),/現金股利發放日/);
+});
+
 test('individual yield and trailing ETF yield use official fields and ROC dates', async () => {
   const {records, warnings} = await setup(fixtures).update(['1101', '1216', '0056']);
   assert.ok(Math.abs(records['1101'].yield - .0289) < 1e-12);

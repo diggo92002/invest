@@ -2,6 +2,7 @@
 window.CashflowMarket = (() => {
   // Single source of truth: server.mjs loads these same endpoints for its proxy.
   const endpoints = Object.freeze({
+    stockDividends: 'https://api.finmindtrade.com/api/v4/data',
     yields: 'https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL',
     prices: 'https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',
     dividends: 'https://www.twse.com.tw/rwd/zh/ETF/etfDiv'
@@ -136,5 +137,30 @@ window.CashflowMarket = (() => {
     } else if (wantETFs) warn('ETF 收盤價資料取得失敗');
     return {records, warnings};
   }
-  return {endpoints, cached, save, update};
+  async function lookup(code) {
+    const today=taipeiDate.format(new Date());
+    const {records,warnings}=await update([code]);
+    const record=records[code];
+    if(!record) throw new Error(warnings.join('；')||'查無殖利率資料');
+    let payments=[];
+    if(isETF(code)) {
+      const data=await json('dividends',{response:'json',startDate:compact(shift(today,-2)),endDate:compact(today),stkNo:''});
+      const fields=data.fields||[], ci=fields.findIndex(f=>/證券代號/.test(f)), pi=fields.findIndex(f=>/收益分配發放日/.test(f)), ai=fields.findIndex(f=>/收益分配金額/.test(f));
+      if(data.stat!=='OK'||!Array.isArray(data.data)||[ci,pi,ai].some(i=>i<0)) throw new Error('配息月份資料格式異常');
+      payments=data.data.filter(r=>r[ci]===code&&number(r[ai])>0).map(r=>date(r[pi]));
+    } else {
+      const data=await json('stockDividends',{dataset:'TaiwanStockDividend',data_id:code,start_date:shift(today,-2)});
+      if(data.status!==200||!Array.isArray(data.data)) {
+        const detail=String(data.msg||data.message||'回傳資料格式不符').replace(/<[^>]*>/g,'').slice(0,180);
+        throw new Error('個股配息資料來源 FinMind 回覆：'+detail+(data.status?'（狀態 '+data.status+'）':''));
+      }
+      payments=data.data.filter(r=>r.stock_id===code&&Number(r.CashEarningsDistribution)+Number(r.CashStatutorySurplus)>0).map(r=>date(r.CashDividendPaymentDate));
+    }
+    payments=payments.filter(d=>d&&d<=today).sort();
+    const latest=payments[payments.length-1];
+    if(!latest||latest<=shift(today,-1)) throw new Error('近一年查無現金股利發放日，無法判定配息月份');
+    const months=[...new Set(payments.filter(d=>d>shift(latest,-1)).map(d=>Number(d.slice(5,7))))].sort((a,b)=>a-b);
+    return {...record,months};
+  }
+  return {endpoints, cached, save, update, lookup};
 })();

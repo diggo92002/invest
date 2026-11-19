@@ -78,6 +78,16 @@
       .bar-label{font-size:10px}.month em{font-size:11px}.legend{font-size:12px}
       .card{padding:18px 16px}.metric .label,.delta{font-size:12px}
     }
+    /* Align both editable percentages and keep narrow cards compact. */
+    .stock{gap:6px 12px;align-content:start}
+    .stock p{margin-bottom:4px}
+    .allocation-field{padding-top:0;display:grid;grid-template-columns:minmax(0,76px) auto;gap:4px 5px;align-content:start;align-items:center;justify-content:start}
+    .allocation-caption{grid-column:1/-1;color:var(--muted);font-size:12px;line-height:1.6}
+    .stock .yield label{display:grid;grid-template-columns:minmax(0,76px) auto;gap:4px 5px;justify-content:end;align-items:center}
+    .yield-caption{grid-column:1/-1;line-height:1.6}
+    .stock .yield-input,.stock .alloc{width:100%;max-width:100%}
+    .yield small{font-size:11px;margin-top:4px;line-height:1.5}
+    @media(max-width:359px){.allocation-field,.stock .yield label{grid-template-columns:minmax(0,64px) auto}.stock{column-gap:8px}}
   </style>
 </head>
 <body>
@@ -85,7 +95,7 @@
     <nav class="nav"><div class="brand"><span class="mark">↗</span>現金流配息計畫</div><small id="today">試算工具</small></nav>
     <section class="hero"><p>把貸款月付金與季度配息放進同一張圖，先看現金流能不能接住，再思考投資配置。</p></section>
     <section class="summary"><div class="metric good"><div class="label">預估每月配息</div><div class="value" id="monthlyIncome">NT$ 18,250</div><div class="delta">按季度入帳平均攤算</div></div><div class="metric"><div class="label">貸款月付金</div><div class="value" id="monthlyPay">NT$ 15,849</div><div class="delta">本息平均攤還</div></div><div class="metric"><div class="label">每月現金流餘額</div><div class="value" id="monthlyGap">+NT$ 2,401</div><div class="delta" id="gapNote">安全墊約 15.2%</div></div><div class="metric"><div class="label">預估年配息率</div><div class="value" id="avgYield">7.30%</div><div class="delta">目前配置加權</div></div></section>
-    <section class="grid"><div><article class="card card-loan"><div class="section-head"><div><h2>貸款試算</h2><p class="sub">調整數字，立刻重算每月還款。</p></div><span class="pill">本息攤還</span></div><div class="form-grid"><div class="field wide"><label>貸款本金 <span>新台幣</span></label><input id="principal" inputmode="numeric" type="text" pattern="[0-9,]*" autocomplete="off" enterkeyhint="done" value="2,000,000"></div><div class="field"><label>年利率 <span>%</span></label><input id="rate" inputmode="decimal" type="number" value="2.2" min="0" step="0.1"></div><div class="field"><label>期數 <span>年</span></label><input id="years" inputmode="decimal" type="number" value="15" min="1" step="1"></div></div><button class="cta" id="recalc">重新計算現金流 ↗</button></article><article class="card card-etf"><div class="section-head"><div><h2 id="stockTitle">配息標的</h2><p class="sub">勾選要納入試算的標的，或輸入代號自行新增。殖利率為參考值，不是保證報酬。</p></div><span class="pill">可自行調整</span></div><details class="picker" id="picker"><summary>選擇／新增標的 <span id="pickerCount"></span></summary><div class="picker-body"><div class="chips" id="chips"></div><form class="add-stock" id="addStock" novalidate><label class="add-field"><span>股票代號</span><input id="newCode" placeholder="例：2884" maxlength="7" autocomplete="off" autocapitalize="characters" enterkeyhint="done"></label><label class="add-field"><span>配息月份</span><select id="newMonthsPreset"><option value="1,4,7,10">季配 1、4、7、10 月</option><option value="2,5,8,11">季配 2、5、8、11 月</option><option value="3,6,9,12">季配 3、6、9、12 月</option><option value="1,2,3,4,5,6,7,8,9,10,11,12">月配</option><option value="1,7">半年配 1、7 月</option><option value="7">年配 7 月</option><option value="custom">自訂月份…</option></select><input id="newMonthsCustom" placeholder="例：6,12" hidden aria-label="自訂配息月份"></label><label class="add-field"><span>殖利率 %（選填）</span><input id="newYield" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="自動取得"></label><button class="allocation-preset" type="submit">＋ 新增</button></form><p class="picker-note" id="addStockMsg" role="status" aria-live="polite">僅支援證交所上市股票與 ETF。新增後會自動取得名稱與殖利率，配息月份用於現金流試算。</p></div></details><div class="toolbar"><button type="button" class="allocation-preset" id="presetThree" title="0056：34%、00878：33%、00919：33%，其餘歸零">預設 3 檔配置</button><button type="button" class="allocation-preset" id="recommendAllocation" aria-describedby="allocationHint" title="七檔平均分散：0056、00878 各 15%，其餘各 14%">推薦分配比例</button><button type="button" class="allocation-preset ghost" id="refreshYields">更新殖利率</button></div><p class="sub" id="allocationHint" role="status" aria-live="polite">推薦比例採七檔平均分散的試算範例，可套用後再自行調整。</p><div class="market-tools"><p id="marketStatus" role="status" aria-live="polite">尚未更新，使用內建試算值；可直接修改各檔殖利率，手動設定不會被自動更新覆蓋。</p><p>資料來源：<a href="https://openapi.twse.com.tw/" target="_blank" rel="noopener noreferrer">證交所</a>、<a href="https://www.twse.com.tw/zh/products/securities/etf/products/div.html" target="_blank" rel="noopener noreferrer">ETF 收益分配</a>。每日收盤資料；ETF 依配息頻率取最近一年各次除息金額 ÷ 收盤價。入帳月份仍為模擬設定。</p></div><div class="stocks" id="stocks"></div><div class="foot">內建數值僅供試算；成功連線後改用證交所資料，每檔會顯示資料日期。實際殖利率會隨股價、配息政策與除權息變動。內建名單為月配、季配息 ETF；自行新增的標的請確認配息月份、規模、填息率與配息來源。</div></article></div><div><article class="card card-flow"><div class="section-head"><div><h2>每月現金流</h2><p class="sub">黃色為配息流入，橘線為貸款支出。每月都能看到一個節奏。</p></div><span class="pill">12 個月視圖</span></div><div class="bars" id="bars"></div><div class="legend"><span><i class="dot"></i>預估配息</span><span><i class="dot orange"></i>月付金</span></div><div class="calendar"><div class="month-row" id="calendar"></div></div></article><article class="card card-judge"><h2>一眼判斷</h2><p class="sub">當「每月配息平均」高於「貸款月付金」，才有機會形成正向現金流；但實際入帳仍依各檔月配、季配時程而定，請預留緩衝。</p><div class="annual-totals"><div style="background:var(--mint);padding:14px;border-radius:14px"><div style="font-size:11px;color:var(--green)">年度配息總額</div><strong id="annualIncome" style="display:block;font-size:22px;margin-top:5px">NT$ 219,000</strong></div><div style="background:#fff3ec;padding:14px;border-radius:14px"><div style="font-size:11px;color:#b4582f">年度還款總額</div><strong id="annualPay" style="display:block;font-size:22px;margin-top:5px">NT$ 190,188</strong></div></div></article></div></section>
+    <section class="grid"><div><article class="card card-loan"><div class="section-head"><div><h2>貸款試算</h2><p class="sub">調整數字，立刻重算每月還款。</p></div><span class="pill">本息攤還</span></div><div class="form-grid"><div class="field wide"><label for="principal">貸款本金 <span>萬元（新台幣）</span></label><input id="principal" inputmode="decimal" type="number" min="0" step="0.0001" autocomplete="off" enterkeyhint="done" value="200"></div><div class="field"><label>年利率 <span>%</span></label><input id="rate" inputmode="decimal" type="number" value="2.2" min="0" step="0.1"></div><div class="field"><label>期數 <span>年</span></label><input id="years" inputmode="decimal" type="number" value="15" min="1" step="1"></div></div><button class="cta" id="recalc">重新計算現金流 ↗</button></article><article class="card card-etf"><div class="section-head"><div><h2 id="stockTitle">配息標的</h2><p class="sub">勾選要納入試算的標的，或輸入代號自行新增。殖利率為參考值，不是保證報酬。</p></div><span class="pill">可自行調整</span></div><details class="picker" id="picker"><summary>選擇／新增標的 <span id="pickerCount"></span></summary><div class="picker-body"><div class="chips" id="chips"></div><form class="add-stock" id="addStock" novalidate><label class="add-field"><span>股票代號</span><input id="newCode" placeholder="例：2884" maxlength="7" autocomplete="off" autocapitalize="characters" enterkeyhint="done"></label><button class="allocation-preset" type="submit">＋ 新增</button></form><p class="picker-note" id="addStockMsg" role="status" aria-live="polite">只需輸入上市股票或 ETF 代號，自動查詢名稱、殖利率與歷史配息月份。</p></div></details><div class="toolbar"><button type="button" class="allocation-preset" id="presetThree" title="0056：34%、00878：33%、00919：33%，其餘歸零">預設 3 檔配置</button><button type="button" class="allocation-preset" id="recommendAllocation" aria-describedby="allocationHint" title="七檔平均分散：0056、00878 各 15%，其餘各 14%">推薦分配比例</button><button type="button" class="allocation-preset ghost" id="refreshYields">更新殖利率</button></div><p class="sub" id="allocationHint" role="status" aria-live="polite">推薦比例採七檔平均分散的試算範例，可套用後再自行調整。</p><div class="market-tools"><p id="marketStatus" role="status" aria-live="polite">尚未更新，使用內建試算值；可直接修改各檔殖利率，手動設定不會被自動更新覆蓋。</p><p>資料來源：<a href="https://openapi.twse.com.tw/" target="_blank" rel="noopener noreferrer">證交所</a>、<a href="https://www.twse.com.tw/zh/products/securities/etf/products/div.html" target="_blank" rel="noopener noreferrer">ETF 收益分配</a>；個股發放日：<a href="https://finmind.github.io/tutor/TaiwanMarket/Fundamental/" target="_blank" rel="noopener noreferrer">FinMind</a>。每日收盤資料；ETF 依配息頻率取最近一年各次除息金額 ÷ 收盤價。新增標的的配息月份依歷史現金發放日推算，未來以公告為準。</p></div><div class="stocks" id="stocks"></div><div class="foot">內建數值僅供試算；成功連線後改用證交所資料，每檔會顯示資料日期。實際殖利率會隨股價、配息政策與除權息變動。內建名單為月配、季配息 ETF；自行新增的標的請確認配息月份、規模、填息率與配息來源。</div></article></div><div><article class="card card-flow"><div class="section-head"><div><h2>每月現金流</h2><p class="sub">黃色為配息流入，橘線為貸款支出。每月都能看到一個節奏。</p></div><span class="pill">12 個月視圖</span></div><div class="bars" id="bars"></div><div class="legend"><span><i class="dot"></i>預估配息</span><span><i class="dot orange"></i>月付金</span></div><div class="calendar"><div class="month-row" id="calendar"></div></div></article><article class="card card-judge"><h2>一眼判斷</h2><p class="sub">當「每月配息平均」高於「貸款月付金」，才有機會形成正向現金流；但實際入帳仍依各檔月配、季配時程而定，請預留緩衝。</p><div class="annual-totals"><div style="background:var(--mint);padding:14px;border-radius:14px"><div style="font-size:11px;color:var(--green)">年度配息總額</div><strong id="annualIncome" style="display:block;font-size:22px;margin-top:5px">NT$ 219,000</strong></div><div style="background:#fff3ec;padding:14px;border-radius:14px"><div style="font-size:11px;color:#b4582f">年度還款總額</div><strong id="annualPay" style="display:block;font-size:22px;margin-top:5px">NT$ 190,188</strong></div></div></article></div></section>
     <footer class="foot">本頁僅供個人財務規劃與教育用途，不構成投資、借貸或稅務建議。高殖利率可能伴隨高波動與減配風險；借款投資前請評估收入穩定度、緊急預備金與最壞情境。</footer>
   </main>
   <script src="market-data.js"></script>
@@ -138,7 +148,7 @@
       return record?record.yield:(stock.yield??0);
     }
     function calc(){
-      const principal=Number($('#principal').value.replace(/[^\d]/g,''))||0, rate=(+$('#rate').value||0)/100/12, n=(+$('#years').value||1)*12;
+      const principal=(Number($('#principal').value)||0)*10000, rate=(+$('#rate').value||0)/100/12, n=(+$('#years').value||1)*12;
       const pay=rate?principal*rate*Math.pow(1+rate,n)/(Math.pow(1+rate,n)-1):principal/n;
       const list=visibleStocks(), weights=list.map(s=>(allocation[s.code]||0)/100);
       const weighted=list.reduce((sum,s,i)=>sum+weights[i]*yieldOf(s),0);
@@ -158,7 +168,7 @@
       const list=visibleStocks();
       $('#stockTitle').textContent='配息標的（'+list.length+' 檔）';
       $('#stocks').innerHTML=list.length
-        ? list.map(s=>'<div class="stock" data-code="'+s.code+'"><div><h3><span class="stock-name">'+s.code+(s.name?' '+escapeHTML(s.name):'')+'</span>'+(s.custom?'<span class="stock-tag">自訂</span>':'')+'</h3><p>'+escapeHTML(s.note)+'</p><label class="allocation-field"><input class="alloc" inputmode="decimal" type="number" value="'+(allocation[s.code]||0)+'" min="0" max="100" step="1"> <span>% 配置</span></label></div><div class="yield"><label><span class="yield-caption">殖利率</span><input class="yield-input" inputmode="decimal" type="number" min="0" max="100" step="0.01" aria-label="'+s.code+' 殖利率百分比"> %</label><small class="yield-source"></small><button type="button" class="yield-auto">恢復自動</button></div></div>').join('')+'<div class="allocation-total"><span>配置合計</span><strong id="allocationTotal">0%</strong></div>'
+        ? list.map(s=>'<div class="stock" data-code="'+s.code+'"><div><h3><span class="stock-name">'+s.code+(s.name?' '+escapeHTML(s.name):'')+'</span>'+(s.custom?'<span class="stock-tag">自訂</span>':'')+'</h3><p>'+escapeHTML(s.note)+'</p><label class="allocation-field"><span class="allocation-caption">配置比例</span><input class="alloc" inputmode="decimal" type="number" value="'+(allocation[s.code]||0)+'" min="0" max="100" step="1"> <span>%</span></label></div><div class="yield"><label><span class="yield-caption">殖利率</span><input class="yield-input" inputmode="decimal" type="number" min="0" max="100" step="0.01" aria-label="'+s.code+' 殖利率百分比"> %</label><small class="yield-source"></small><button type="button" class="yield-auto">恢復自動</button></div></div>').join('')+'<div class="allocation-total"><span>配置合計</span><strong id="allocationTotal">0%</strong></div>'
         : '<p class="empty-stocks">尚未選擇任何標的，請展開上方「選擇／新增標的」勾選或新增。</p>';
       renderPicker();
       applyMarketRecords();
@@ -213,27 +223,23 @@
       setAddMessage('已移除 '+code+'。');
     });
     function setAddMessage(text,error=false){const note=$('#addStockMsg'); note.textContent=text; note.classList.toggle('error',error);}
-    $('#newMonthsPreset').addEventListener('change',()=>{const custom=$('#newMonthsPreset').value==='custom'; $('#newMonthsCustom').hidden=!custom; if(custom) $('#newMonthsCustom').focus();});
-    $('#addStock').addEventListener('submit',event=>{
+    $('#addStock').addEventListener('submit',async event=>{
       event.preventDefault();
       const code=$('#newCode').value.trim().toUpperCase();
-      if(!codePattern.test(code)) return setAddMessage('代號格式不正確：請輸入 4–6 位數字，可含結尾英文字母（如 00679B）。',true);
-      if(allStocks().some(s=>s.code===code)){hidden.delete(code); savePortfolio(); renderStocks(); return setAddMessage(code+' 已在清單中，已勾選顯示。');}
-      const preset=$('#newMonthsPreset').value;
-      const list=[...new Set((preset==='custom'?$('#newMonthsCustom').value:preset).split(/[\s,，、]+/).filter(Boolean).map(Number))].sort((a,b)=>a-b);
-      if(!validMonths(list)) return setAddMessage('配息月份請填 1–12，以逗號分隔，例如 6,12。',true);
-      const yieldText=$('#newYield').value.trim();
-      if(yieldText!==''){
-        const value=Number(yieldText);
-        if(!(value>=0&&value<=100)) return setAddMessage('殖利率請填 0–100 之間的數字。',true);
-        manualYields[code]=value; saveManualYields();
-      }
-      customStocks.push({code,months:list}); allocation[code]=0; hidden.delete(code);
-      savePortfolio();
-      $('#newCode').value=''; $('#newYield').value='';
-      renderStocks();
-      setAddMessage('已新增 '+code+'，正在向證交所取得名稱與殖利率；記得在下方設定配置比例。');
-      refreshYields();
+      if(!codePattern.test(code)) return setAddMessage('請輸入正確股票代號，例如 8215 或 0056。',true);
+      if(allStocks().some(s=>s.code===code)){hidden.delete(code);savePortfolio();renderStocks();return setAddMessage(code+' 已在清單中。');}
+      const button=$('#addStock button[type="submit"]');
+      if(button.disabled) return;
+      button.disabled=true;button.textContent='查詢中…';setAddMessage('正在查詢 '+code+' 的名稱、殖利率與配息月份…');
+      try{
+        const record=await CashflowMarket.lookup(code);
+        if(!allStocks().some(s=>s.code===code)){customStocks.push({code,months:record.months});allocation[code]=0;}
+        if(!marketRecords[code]||record.date>=marketRecords[code].date) marketRecords[code]=record;
+        CashflowMarket.save(marketRecords);hidden.delete(code);savePortfolio();renderStocks();
+        $('#newCode').value='';
+        setAddMessage('已新增 '+code+' '+(record.name||'')+'；歷史發放月份：'+monthsNote(record.months)+'（未來以公告為準）。請設定配置比例。');
+      }catch(error){setAddMessage('無法新增 '+code+'：'+error.message+'。可稍後再按新增重試。',true);}
+      finally{button.disabled=false;button.textContent='＋ 新增';}
     });
     let updatingYields=false, refreshQueued=false;
     async function refreshYields(){
@@ -276,12 +282,10 @@
     }
     $('#presetThree').addEventListener('click',()=>applyAllocation(threeStockAllocation,'已套用 3 檔配置：0056 34%、00878 33%、00919 33%，其餘歸零。'));
     $('#recommendAllocation').addEventListener('click',()=>applyAllocation(recommendedAllocation,'已套用七檔平均分散範例：0056、00878 各 15%，其餘各 14%，合計 100%。'));
-    // Loan inputs: thousands separators for the amount, and remember the last values in this browser.
+    // Principal input uses ten-thousand TWD; storage keeps TWD for compatibility.
     const loanKey='cashflow-loan-v1', loanIds=['principal','rate','years'];
-    const formatAmount=value=>{const digits=String(value).replace(/[^\d]/g,'').replace(/^0+(?=\d)/,'');return digits?Number(digits).toLocaleString('en-US'):'';};
-    try{const saved=JSON.parse(localStorage.getItem(loanKey)||'{}');loanIds.forEach(id=>{if(saved[id]!=null&&saved[id]!=='')$('#'+id).value=id==='principal'?formatAmount(saved[id]):saved[id];});}catch{}
-    $('#principal').addEventListener('input',event=>{const input=event.target,before=input.value,caret=input.selectionStart??before.length,digitsBefore=before.slice(0,caret).replace(/[^\d]/g,'').length,next=formatAmount(before);if(next===before)return;input.value=next;let pos=0,seen=0;while(pos<next.length&&seen<digitsBefore){if(/\d/.test(next[pos]))seen++;pos++;}try{input.setSelectionRange(pos,pos);}catch{}});
-    loanIds.forEach(id=>$('#'+id).addEventListener('input',()=>{const data={};loanIds.forEach(k=>data[k]=k==='principal'?$('#'+k).value.replace(/[^\d]/g,''):$('#'+k).value);try{localStorage.setItem(loanKey,JSON.stringify(data));}catch{}}));
+    try{const saved=JSON.parse(localStorage.getItem(loanKey)||'{}');loanIds.forEach(id=>{if(saved[id]!=null&&saved[id]!=='')$('#'+id).value=id==='principal'?Number(String(saved[id]).replace(/,/g,''))/10000:saved[id];});}catch{}
+    loanIds.forEach(id=>$('#'+id).addEventListener('input',()=>{const data={};loanIds.forEach(k=>data[k]=k==='principal'?String((Number($('#'+k).value)||0)*10000):$('#'+k).value);try{localStorage.setItem(loanKey,JSON.stringify(data));}catch{}}));
     loanIds.forEach(id=>$('#'+id).addEventListener('input',calc));
     // The button recalculates and also pulls the latest TWSE yields, so every number on the page is current.
     const showToday=()=>{$('#today').textContent='試算工具 · '+new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());};

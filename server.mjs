@@ -17,6 +17,11 @@ async function market(route, query) {
     if (!/^\d{8}$/.test(start || '') || !/^\d{8}$/.test(end || '') || start > end) throw new Error('Invalid dates');
     url.search = new URLSearchParams({response: 'json', stkNo: '', startDate: start, endDate: end});
   }
+  if (route === 'stockDividends') {
+    const code=query.get('data_id'), start=query.get('start_date');
+    if(!/^\d{4,6}[A-Z]?$/.test(code||'')||!/^\d{4}-\d{2}-\d{2}$/.test(start||'')) throw new Error('Invalid stock query');
+    url.search=new URLSearchParams({dataset:'TaiwanStockDividend',data_id:code,start_date:start});
+  }
   const key = url.href;
   const saved = cache.get(key);
   if (saved && Date.now() - saved.time < 3600000) return saved.body;
@@ -25,7 +30,7 @@ async function market(route, query) {
     const response = await fetch(url, {signal: AbortSignal.timeout(15000), headers: {Accept: 'application/json'}});
     if (!response.ok) throw new Error('Upstream HTTP ' + response.status);
     const data = await response.json();
-    if (route === 'dividends' ? data.stat !== 'OK' || !Array.isArray(data.data) : !Array.isArray(data)) throw new Error('Unexpected upstream data');
+    if (route === 'dividends' ? data.stat !== 'OK' || !Array.isArray(data.data) : route === 'stockDividends' ? data.status !== 200 || !Array.isArray(data.data) : !Array.isArray(data)) throw new Error('Unexpected upstream data');
     const body = JSON.stringify(data);
     if (cache.size >= 50) cache.delete(cache.keys().next().value);
     cache.set(key, {time: Date.now(), body});
