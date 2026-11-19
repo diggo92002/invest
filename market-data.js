@@ -1,11 +1,16 @@
 /* Official TWSE daily data. No API key or third-party proxy. */
 window.CashflowMarket = (() => {
-  const endpoints = {
+  // Single source of truth: server.mjs loads these same endpoints for its proxy.
+  const endpoints = Object.freeze({
     yields: 'https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL',
     prices: 'https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',
     dividends: 'https://www.twse.com.tw/rwd/zh/ETF/etfDiv'
-  };
+  });
   const cacheKey = 'cashflow-market-v1';
+  const maxYield = 0.3; // Plausibility cap: anything higher is treated as a data error.
+  const graceDays = 31; // Ex-dividend dates drift by days or weeks between years.
+  const taipeiDate = new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'});
+  const isETF = code => code.startsWith('00');
   function number(value) {
     const text = String(value ?? '').replace(/,/g, '').trim();
     return /^\d+(\.\d+)?$/.test(text) ? Number(text) : NaN;
@@ -20,12 +25,16 @@ window.CashflowMarket = (() => {
     return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === Number(parts[2]) - 1
       && parsed.getUTCDate() === Number(parts[3]) ? parsed.toISOString().slice(0, 10) : null;
   }
-  async function json(url) {
-    if (document.querySelector('meta[name="market-proxy"]')) {
-      const upstream = new URL(url);
-      const route = upstream.pathname.endsWith('BWIBBU_ALL') ? 'yields' : upstream.pathname.endsWith('STOCK_DAY_ALL') ? 'prices' : 'dividends';
-      url = '/api/market/' + route + upstream.search;
-    }
+  function shift(isoDate, years, days = 0) {
+    const shifted = new Date(isoDate + 'T00:00:00Z');
+    shifted.setUTCFullYear(shifted.getUTCFullYear() + years);
+    shifted.setUTCDate(shifted.getUTCDate() + days);
+    return shifted.toISOString().slice(0, 10);
+  }
+  const compact = isoDate => isoDate.replace(/-/g, '');
+  async function json(route, params) {
+    const base = document.querySelector('meta[name="market-proxy"]') ? '/api/market/' + route : endpoints[route];
+    const url = base + (params ? '?' + new URLSearchParams(params) : '');
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 20000);
     try {
@@ -35,9 +44,9 @@ window.CashflowMarket = (() => {
     } finally { clearTimeout(timeout); }
   }
   function valid(record) {
-    const today = new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date());
-    return record && Number.isFinite(record.yield) && record.yield >= 0 && record.yield <= 1
-      && /^\d{4}-\d{2}-\d{2}$/.test(record.date) && date(record.date) === record.date && record.date <= today;
+    return record && Number.isFinite(record.yield) && record.yield >= 0 && record.yield <= maxYield
+      && /^\d{4}-\d{2}-\d{2}$/.test(record.date) && date(record.date) === record.date
+      && record.date <= taipeiDate.format(new Date());
   }
   function cached() {
     try {
@@ -48,49 +57,77 @@ window.CashflowMarket = (() => {
   function save(records) {
     try { localStorage.setItem(cacheKey, JSON.stringify(records)); } catch { /* Private/storage-disabled mode. */ }
   }
-  async function update(codes) {
+  function etfRecords(dividends, prices, frequencies, records, warn) {
+    const fields = dividends.fields || [];
+    const codeIndex = fields.findIndex(field => /證券代號/.test(field));
+    const dateIndex = fields.findIndex(field => /除息交易日/.test(field));
+    const amountIndex = fields.findIndex(field => /收益分配金額/.test(field));
+    if (dividends.stat !== 'OK' || !Array.isArray(dividends.data) || [codeIndex, dateIndex, amountIndex].some(index => index < 0)) throw new Error('Unexpected dividend data');
+    const byCode = new Map();
+    for (const row of dividends.data) {
+      const list = byCode.get(row[codeIndex]) || [];
+      list.push({exDate: date(row[dateIndex]), amount: number(row[amountIndex])});
+      byCode.set(row[codeIndex], list);
+    }
+    for (const price of prices) {
+      const code = price.Code;
+      const priceDate = date(price.Date);
+      const close = number(price.ClosingPrice);
+      if (!priceDate || !(close > 0)) { warn(code + ' 收盤價資料異常'); continue; }
+      const history = byCode.get(code) || [];
+      if (history.some(row => !row.exDate)) { warn(code + ' 除息日期格式異常'); continue; }
+      const expected = frequencies[code];
+      const known = Number.isInteger(expected) && expected > 0;
+      // With a known frequency, look slightly past one year and keep only the latest N
+      // distributions, so drifting ex-dates neither add a fifth quarter nor drop one.
+      const from = shift(priceDate, -1, known ? -graceDays : 0);
+      const rows = history.filter(row => row.exDate > from && row.exDate <= priceDate)
+        .sort((a, b) => b.exDate.localeCompare(a.exDate));
+      const used = known ? rows.slice(0, expected) : rows;
+      if (!used.length) { warn(code + ' 近一年無配息紀錄'); continue; }
+      if (known && used.length < expected) { warn(code + ' 近一年僅 ' + used.length + '/' + expected + ' 次配息紀錄（可能上市未滿一年）'); continue; }
+      // Missing distributions or amounts must not silently become a zero yield.
+      if (used.some(row => !Number.isFinite(row.amount))) { warn(code + ' 配息金額缺漏'); continue; }
+      const annual = used.reduce((sum, row) => sum + row.amount, 0);
+      const record = {yield: annual / close, date: priceDate,
+        method: known ? '最近 ' + expected + ' 次除息金額／收盤價' : '近一年除息金額／收盤價（配息頻率未知）'};
+      if (valid(record)) records[code] = record;
+      else warn(code + ' 計算結果超出合理範圍，未採用');
+    }
+  }
+  /**
+   * @param {string[]} codes
+   * @param {Record<string, number>} frequencies expected distributions per year, keyed by code
+   * @returns {Promise<{records: Record<string, object>, warnings: string[]}>}
+   */
+  async function update(codes, frequencies = {}) {
+    const wanted = new Set(codes);
     const records = {};
-    const results = await Promise.allSettled([json(endpoints.yields), json(endpoints.prices)]);
-    if (results[0].status === 'fulfilled' && Array.isArray(results[0].value)) {
-      for (const row of results[0].value) {
-        if (!codes.includes(row.Code) || row.Code.startsWith('00')) continue;
+    const warnings = [];
+    const warn = message => { if (!warnings.includes(message)) warnings.push(message); };
+    const wantStocks = codes.some(code => !isETF(code));
+    const wantETFs = codes.some(isETF);
+    const [yields, prices] = await Promise.allSettled([json('yields'), json('prices')]);
+    if (yields.status === 'fulfilled' && Array.isArray(yields.value)) {
+      for (const row of yields.value) {
+        if (!wanted.has(row.Code) || isETF(row.Code)) continue;
         const record = {yield: number(row.DividendYield) / 100, date: date(row.Date), method: '證交所殖利率'};
         if (valid(record)) records[row.Code] = record;
+        else warn(row.Code + ' 無有效殖利率資料');
       }
-    }
-    if (results[1].status === 'fulfilled' && Array.isArray(results[1].value)) {
-      const prices = results[1].value.filter(row => codes.includes(row.Code) && row.Code.startsWith('00'));
-      const dates = prices.map(row => date(row.Date)).filter(Boolean).sort();
+    } else if (wantStocks) warn('個股殖利率資料取得失敗');
+    if (prices.status === 'fulfilled' && Array.isArray(prices.value)) {
+      const etfPrices = prices.value.filter(row => wanted.has(row.Code) && isETF(row.Code));
+      const dates = etfPrices.map(row => date(row.Date)).filter(Boolean).sort();
       if (dates.length) {
-        const end = dates[dates.length - 1];
-        const startDate = new Date(end + 'T00:00:00Z');
-        startDate.setUTCFullYear(startDate.getUTCFullYear() - 1);
-        const start = startDate.toISOString().slice(0, 10);
-        const query = new URLSearchParams({response: 'json', startDate: start.replace(/-/g, ''), endDate: end.replace(/-/g, ''), stkNo: ''});
+        // Start from the earliest price date so every ETF's window is fully covered.
+        const query = {response: 'json', startDate: compact(shift(dates[0], -1, -graceDays)), endDate: compact(dates[dates.length - 1]), stkNo: ''};
         try {
-          const dividends = await json(endpoints.dividends + '?' + query);
-          const fields = dividends.fields || [];
-          const codeIndex = fields.findIndex(field => /證券代號/.test(field));
-          const dateIndex = fields.findIndex(field => /除息交易日/.test(field));
-          const amountIndex = fields.findIndex(field => /收益分配金額/.test(field));
-          if (dividends.stat !== 'OK' || !Array.isArray(dividends.data) || [codeIndex, dateIndex, amountIndex].some(index => index < 0)) throw new Error('Unexpected dividend data');
-          for (const price of prices) {
-            const priceDate = date(price.Date);
-            const close = number(price.ClosingPrice);
-            if (!priceDate || !(close > 0)) continue;
-            const cutoff = new Date(priceDate + 'T00:00:00Z');
-            cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1);
-            const rows = dividends.data.filter(row => row[codeIndex] === price.Code && date(row[dateIndex]) > cutoff.toISOString().slice(0, 10) && date(row[dateIndex]) <= priceDate);
-            // Missing distributions or amounts must not silently become a zero yield.
-            if (!rows.length || rows.some(row => !Number.isFinite(number(row[amountIndex])))) continue;
-            const annual = rows.reduce((sum, row) => sum + number(row[amountIndex]), 0);
-            const record = {yield: annual / close, date: priceDate, method: '近一年除息金額／收盤價'};
-            if (valid(record)) records[price.Code] = record;
-          }
-        } catch { /* Keep individual stock updates if the ETF endpoint is unavailable. */ }
+          etfRecords(await json('dividends', query), etfPrices, frequencies, records, warn);
+        } catch { warn('ETF 配息資料取得失敗'); }
       }
-    }
-    return records;
+    } else if (wantETFs) warn('ETF 收盤價資料取得失敗');
+    return {records, warnings};
   }
-  return {cached, save, update};
+  return {endpoints, cached, save, update};
 })();

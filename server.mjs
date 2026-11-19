@@ -1,13 +1,13 @@
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
+import vm from 'node:vm';
 
 const root = new URL('./', import.meta.url);
-const upstreams = {
-  yields: 'https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL',
-  prices: 'https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',
-  dividends: 'https://www.twse.com.tw/rwd/zh/ETF/etfDiv'
-};
+// Reuse the browser module's endpoint list so the two never drift apart.
+const browserModule = {window: {}};
+vm.runInNewContext(await readFile(new URL('market-data.js', root), 'utf8'), browserModule);
+const upstreams = browserModule.window.CashflowMarket.endpoints;
 const cache = new Map();
 const pending = new Map();
 async function market(route, query) {
